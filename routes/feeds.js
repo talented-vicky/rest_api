@@ -6,7 +6,9 @@ const router = express.Router()
 
 const feedCtrl = require('../controllers/feeds')
 
-router.get('/posts', feedCtrl.getPosts)
+router.get('/posts', feedCtrl.fetchPosts)
+
+router.get('/post/:postId', feedCtrl.fetchPost)
 
 router.post('/posts', 
     [
