@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const path = require('path')
+const multer = require('multer')
 
 require('dotenv').config()
 const database_connection_url = process.env.database_connection_url
@@ -10,8 +11,30 @@ const feedRoutes = require('./routes/feeds')
 
 const app = express()
 
+const fileStorage = multer.diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, 'images')
+    },
+    filename: (req, file, callback) => {
+        const namePref = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        callback(null, namePref + '-' + file.originalname)
+    }
+})
+
+const filter = (req, file, callback) => {
+    if(file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image.jpeg'){
+        callback(null, true)
+    }
+    else{
+        callback(null, false)
+    }}
+
 app.use(bodyParser.json()) 
 // hence json (coming from client) won't be understood by the server
+
+app.use(multer({storage: fileStorage, fileFilter: filter}).single('image'))
+// nb: single param is formdata name in react
+
 app.use('/images', express.static(path.join(__dirname, 'images')))
 // [0] all request going to /images can be served statically
 // [1][0][1] dirname gives access to app.js which is in the same directory as 
@@ -34,6 +57,7 @@ app.use((err, req, res, next) => {
         message: msg
     })
 })
+
 mongoose.connect(database_connection_url)
     .then(result => {
         app.listen(8080, "0.0.0.0", () => {

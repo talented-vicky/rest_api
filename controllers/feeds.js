@@ -39,10 +39,21 @@ exports.fetchPost = (req, res, next) => {
             })
         })
         .catch(err => errorHandler(err, next))
+
+        // headers: {
+      //   "Content-Type": "application/json"
+      //   // json is suitable for ONLY text data, for file and text, we need
+      //   // the form data, hence no need for setting headers anymore
+      // },
+      // body: JSON.stringify({
+      //   title: postData.title,
+      //   content: postData.content
+      // })
 }
 
 exports.createPost = (req, res, next) => {
     const errors = validationResult(req)
+    const image = req.body
     if(!errors.isEmpty()){
         const error = new Error('Ensure miminum of 5 char for title and 10 char for content')
         error.statusCode = 422 // adding property to new Error
@@ -50,6 +61,14 @@ exports.createPost = (req, res, next) => {
         // the above line exits the function and reaches the next error handling
         // middleware in the express application
     }
+    console.log(image)
+    if(!req.file){
+        const error = new Error("No file uploaded")
+        error.statusCode = 422
+        // throw error
+        return next(error)
+    }
+    const imgUrl = req.file.path
     const title = req.body.title
     const content = req.body.content
     const post = new Post({
@@ -58,7 +77,8 @@ exports.createPost = (req, res, next) => {
         creator: {
             name: "talented boy"
         },
-        image: 'images/meal.jpg'
+        image: imgUrl
+        // image: 'images/meal.jpg'
     })
     post.save()
         .then(postResult => {
@@ -66,6 +86,39 @@ exports.createPost = (req, res, next) => {
                 message: "Successfully created post",
                 post: postResult
             })
+        })
+        .catch(err => errorHandler(err, next))
+}
+
+exports.updatePost = (req, res, next) => {
+    const errors = validationResult(req)
+    const postID = req.params.postId
+    const title = req.body.title
+    const content = req.body.content
+    if(!errors.isEmpty()){
+        const error = new Error('Ensure miminum of 5 char for title and 10 char for content')
+        error.statusCode = 422
+        throw error
+    }
+    let imageUrl = req.body.image
+    // image path is now available (by default) in body cause we added it 
+    // to postForm.image.value in feedEdit.js (frontend)
+    if(req.file){
+        imageUrl = req.file.path
+    }
+    Post.findById(postID)
+        .then(post => {
+            if(!imageUrl){
+                error = new Error("No image uploaded")
+                error.statusCode = 422
+                throw error
+            }
+            Post.title = title
+            Post.content = content
+            Post.image = imageUrl
+        })
+        .then(result => {
+            Post.save()
         })
         .catch(err => errorHandler(err, next))
 }

@@ -22,4 +22,16 @@ router.post('/posts',
     feedCtrl.createPost
 )
 
+router.put('/posts/:postId', 
+    [
+        body('title')
+            .trim()
+            .isLength({min: 5}),
+        body('content')
+            .trim()
+            .isLength({min: 10})
+    ],
+    feedCtrl.updatePost
+)
+
 module.exports = router
