@@ -8,6 +8,7 @@ require('dotenv').config()
 const database_connection_url = process.env.database_connection_url
 
 const feedRoutes = require('./routes/feeds')
+const ctrlRoutes = require('./routes/users')
 
 const app = express()
 
@@ -30,7 +31,7 @@ const filter = (req, file, callback) => {
     }}
 
 app.use(bodyParser.json()) 
-// hence json (coming from client) won't be understood by the server
+// else json (coming from client) won't be understood by the server
 
 app.use(multer({storage: fileStorage, fileFilter: filter}).single('image'))
 // nb: single param is formdata name in react
@@ -49,12 +50,15 @@ app.use((req, res, next) => {
 })
 
 app.use(feedRoutes)
+app.use(ctrlRoutes)
 
 app.use((err, req, res, next) => {
     const status = err.statusCode || 500
     const msg = err.message
+    const data = err.data
     res.status(status).json({
-        message: msg
+        message: msg,
+        data: data
     })
 })
 
