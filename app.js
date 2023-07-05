@@ -8,7 +8,7 @@ require('dotenv').config()
 const database_connection_url = process.env.database_connection_url
 
 const feedRoutes = require('./routes/feeds')
-const ctrlRoutes = require('./routes/users')
+const userRoutes = require('./routes/users')
 
 const app = express()
 
@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 })
 
 app.use(feedRoutes)
-app.use(ctrlRoutes)
+app.use(userRoutes)
 
 app.use((err, req, res, next) => {
     const status = err.statusCode || 500
@@ -64,8 +64,7 @@ app.use((err, req, res, next) => {
 
 mongoose.connect(database_connection_url)
     .then(result => {
-        app.listen(8080, "0.0.0.0", () => {
-            console.log("successfully connected to MongoDB")
-        })
+        app.listen(8080, "0.0.0.0", () => 
+            console.log("successfully connected to MongoDB"))
     })
-    .catch(err => console.log(err))
+    .catch(err => console.log(err))    

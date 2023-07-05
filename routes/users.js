@@ -6,26 +6,27 @@ const { body } = require('express-validator')
 const User = require('../models/user')
 const userCtrl = require('../controllers/users')
 
-router.post('/signup', [
+router.put('/signup', [
     body('email')
         .isEmail()
         .withMessage('Invalid email address')
         .custom(async (val, { req }) => {
-            const userInfo = await User.findOne({email: val})
-            if(userInfo) return Promise.reject("User already exists")
+            const existingUser = await User.findOne({email: val})
+            if(existingUser) return Promise.reject("Email already exists")
         })
         .normalizeEmail(),
     body('password')
         .trim()
-        .isLength({min: 7})
-        .withMessage('Password shouold be at least 7 characters'),
-    body('uername')
+        .isLength({min: 8})
+        .withMessage('Password must be at least 8 characters'),
+    body('name')
         .trim()
         .not()
         .isEmpty()
+        .withMessage("username can't be empty characters"),
 ], userCtrl.signup)
 
-router.post('/login', )
+router.post('/login', userCtrl.login)
 
 
 module.exports = router

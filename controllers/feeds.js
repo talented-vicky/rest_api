@@ -14,16 +14,13 @@ const errorHandler = (error, nxt) => {
 exports.fetchPosts = async (req, res, next) => {
     const currentPage = req.query.page || 1
     const eachPage = 2
-    let total;
     try {
-        totalDoc = await Post.find().countDocuments()
-        total = totalDoc
-        
+        const totalDoc = await Post.find().countDocuments()
         const fetchedPosts = await Post.find().skip((currentPage - 1) * eachPage).limit(eachPage)
         res.status(200).json({
             message: "Fetched posts successfully",
             posts: fetchedPosts,
-            totalItems: total
+            totalItems: totalDoc
         })
     } catch (error) {
         errorHandler(error, next)
@@ -131,8 +128,8 @@ exports.deletePost = async (req, res, next) => {
             throw error
         }
         clearImage(post.image)
-        await Post.findByIdAndRemove(postID)
-        res.status(200).json({message: 'Successfully deleted post'})
+        const delPost = await Post.findByIdAndRemove(postID)
+        res.status(200).json({message: `Successfully deleted post with id:  ${delPost._id}`})
     } catch (error) {
         errorHandler(error, next)
     }
