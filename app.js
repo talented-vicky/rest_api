@@ -7,9 +7,6 @@ const multer = require('multer')
 require('dotenv').config()
 const database_connection_url = process.env.database_connection_url
 
-const feedRoutes = require('./routes/feeds')
-const userRoutes = require('./routes/users')
-
 const app = express()
 
 const fileStorage = multer.diskStorage({
@@ -50,9 +47,6 @@ app.use((req, res, next) => {
     // hence all request will have the headers above
 })
 
-app.use(feedRoutes)
-app.use(userRoutes)
-
 app.use((err, req, res, next) => {
     const status = err.statusCode || 500
     const msg = err.message
@@ -65,19 +59,26 @@ app.use((err, req, res, next) => {
 
 mongoose.connect(database_connection_url)
     .then(result => {
-        const server = app.listen(8080, "0.0.0.0")
-        console.log(`${server} now successfully connected to MongoDB`)
-        const io = require('./socket').initIO(server)
-
-        io.on('connection', socket => {
-            console.log(`Client with ${socket.id} connected`)
-        })
+        app.listen(8080, "0.0.0.0", () => 
+            console.log("successfully connected to MongoDB"))
     })
     .catch(err => console.log(err))    
 
+// check my branches and ensure graphql is in a new branch
 
 /*
 your dreams, secret to your success (what you do
 more that makes you stand out), your problems,
 how much you earn, family problems */    
 // DSPMF
+
+/*
+## a stateless, client-independent API for data exchange
+## gets requests, parse the data, return responses with data
+A rest API doesn't 
+- render views
+- store sessions
+*/
+
+// a graphQL API is simply a restAPI
+// with higher query flexibility
